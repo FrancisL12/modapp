@@ -17,17 +17,17 @@
         }
         .prose ul.list-disc li {
             list-style-type: disc;
-            margin-left: 1.25rem; /* Ajusta o recuo para listas de disco */
+            margin-left: 1.25rem; /* Adjust indent for disc lists */
         }
         .prose ul.list-circle li {
             list-style-type: circle;
-            margin-left: 1.25rem; /* Ajusta o recuo para listas de círculo */
+            margin-left: 1.25rem; /* Adjust indent for circle lists */
         }
         .prose ul.list-square li {
             list-style-type: square;
-            margin-left: 1.25rem; /* Ajusta o recuo para listas de quadrado */
+            margin-left: 1.25rem; /* Adjust indent for square lists */
         }
-        /* Animação para modals */
+        /* Animation for modals */
         .animate-scale-in {
             animation: scaleIn 0.3s ease-out forwards;
         }
@@ -60,15 +60,16 @@
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-100 p-6 font-sans antialiased text-gray-800">
     <div id="app-root" class="container mx-auto max-w-3xl">
-        <!-- Conteúdo será injetado aqui pelo JavaScript -->
+        <!-- Content will be injected here by JavaScript -->
     </div>
 
     <script>
-        // Variáveis de estado globais
+        // Global state variables
         let currentStep = 0;
         let quizCompletedStatus = {}; // { 'moduleId': true/false }
+        let currentQuizScore = null; // To store quiz score in the modal
 
-        // --- Dados da Aplicação (Passos, Quizzes) ---
+        // --- Application Data (Steps, Quizzes) ---
         const steps = [
             {
                 id: 'intro',
@@ -377,7 +378,7 @@
                 content: `
                     <p>Agora que você aprendeu as funções essenciais, é hora de colocar em prática! Abaixo, você verá comentários de usuários e deverá digitar sua resposta como moderador. Tente aplicar tudo o que aprendeu!</p>
                     <p class="font-semibold mt-4">Sua meta é responder da forma mais eficaz possível, seguindo as diretrizes aprendidas.</p>
-                `, // Removido o div 'chat-simulator-container' daqui
+                `, // Removed the 'chat-simulator-container' div from here
             },
             {
                 id: 'recursos-adicionais',
@@ -423,7 +424,7 @@
             },
         ];
 
-        // --- Funções de Componentes (Replicando React com DOM) ---
+        // --- Component Functions (Replicating React with DOM) ---
 
         function createElement(tag, classes, content = '') {
             const el = document.createElement(tag);
@@ -443,16 +444,16 @@
             return button;
         }
 
-        // Modificado para retornar o elemento do card e o elemento de conteúdo interno
+        // Modified to return the card element and the inner content element
         function renderCard(title, contentHtml) {
             const card = createElement('div', 'bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200');
             if (title) {
                 card.appendChild(createElement('h2', 'text-3xl font-extrabold text-gray-900 mb-6 text-center', title));
             }
             const contentDiv = createElement('div', 'prose max-w-none text-gray-700');
-            contentDiv.innerHTML = contentHtml; // Define o conteúdo inicial do módulo
+            contentDiv.innerHTML = contentHtml; // Sets the initial module content
             card.appendChild(contentDiv);
-            return { cardElement: card, contentElement: contentDiv }; // Retorna um objeto com ambos os elementos
+            return { cardElement: card, contentElement: contentDiv }; // Returns an object with both elements
         }
 
         function renderModal(childrenHtml, onClose) {
@@ -465,8 +466,8 @@
             closeButtonWrapper.appendChild(closeButton);
             modalContentWrapper.appendChild(closeButtonWrapper);
 
-            // Adiciona o conteúdo do modal (geralmente o quiz)
-            modalContentWrapper.appendChild(childrenHtml); // childrenHtml já é um elemento DOM
+            // Adds the modal content (usually the quiz)
+            modalContentWrapper.appendChild(childrenHtml); // childrenHtml is already a DOM element
             modalOverlay.appendChild(modalContentWrapper);
 
             return modalOverlay;
@@ -484,13 +485,12 @@
             return progressBarContainer;
         }
 
-        let currentQuizScore = null; // Para manter o score do quiz no modal
-
         function renderQuiz(questions, onSubmit) {
             const quizContainer = createElement('div', 'p-4');
             quizContainer.appendChild(createElement('h3', 'text-2xl font-bold text-gray-800 mb-6 text-center', 'Quiz de Conhecimento'));
 
             let selectedAnswers = {};
+            // 'submitted' state is now managed within the function scope for each quiz instance
             let submitted = false;
 
             questions.forEach((q, qIndex) => {
@@ -505,9 +505,9 @@
                     input.value = oIndex;
                     input.onchange = () => {
                         selectedAnswers[qIndex] = oIndex;
+                        // Re-render the quiz to update button disabled state
+                        updateQuizDisplay();
                     };
-                    input.disabled = submitted;
-
                     label.appendChild(input);
                     label.appendChild(document.createTextNode(option));
 
@@ -517,7 +517,7 @@
             });
 
             const submitButton = renderStyledButton(
-                submitted ? 'Quiz Enviado' : 'Enviar Respostas',
+                'Enviar Respostas', // Text will be updated by updateQuizDisplay
                 () => {
                     let score = 0;
                     questions.forEach((q, index) => {
@@ -525,16 +525,34 @@
                             score++;
                         }
                     });
-                    currentQuizScore = score; // Atualiza o score globalmente
+                    currentQuizScore = score; // Update global score
                     submitted = true;
-                    onSubmit(score); // Chama o callback para o módulo pai
+                    onSubmit(score); // Call the callback for the parent module
 
-                    // Remove qualquer feedback anterior antes de adicionar o novo
-                    const existingFeedback = quizContainer.querySelector('.feedback-message');
-                    if (existingFeedback) {
-                        quizContainer.removeChild(existingFeedback);
-                    }
+                    // Update quiz display after submission
+                    updateQuizDisplay();
+                },
+                'w-full mt-4'
+            );
+            quizContainer.appendChild(submitButton);
 
+            // Function to update the quiz display (e.g., disable inputs, show feedback)
+            function updateQuizDisplay() {
+                // Update button text and disabled state
+                submitButton.textContent = submitted ? 'Quiz Enviado' : 'Enviar Respostas';
+                submitButton.disabled = submitted || Object.keys(selectedAnswers).length < questions.length;
+
+                // Disable radio buttons after submission
+                quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = submitted);
+
+                // Remove any existing feedback before adding the new one
+                const existingFeedback = quizContainer.querySelector('.feedback-message');
+                if (existingFeedback) {
+                    quizContainer.removeChild(existingFeedback);
+                }
+
+                // Add feedback message if submitted
+                if (submitted) {
                     const feedbackHtml = `
                         <p class="text-center mt-4 text-xl feedback-message">
                             Você acertou ${currentQuizScore} de ${questions.length} perguntas.
@@ -544,22 +562,17 @@
                             }
                         </p>
                     `;
-                    quizContainer.appendChild(createElement('div', '', feedbackHtml)); // Adiciona o feedback
+                    quizContainer.appendChild(createElement('div', '', feedbackHtml));
+                }
+            }
 
-                    // Desabilita as opções e o botão de envio após a submissão
-                    quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
-                    submitButton.disabled = true;
-
-                },
-                'w-full mt-4',
-                submitted || Object.keys(selectedAnswers).length < questions.length
-            );
-            quizContainer.appendChild(submitButton);
+            // Initial display update
+            updateQuizDisplay();
 
             return quizContainer;
         }
 
-        // Variáveis de estado para o Simulador de Chat
+        // State variables for the Chat Simulator
         let chatMessages = [
             { sender: 'Usuário', text: 'Que perfume maravilhoso esse!' },
             { sender: 'Usuário', text: 'Onde consigo o link para comprar os decants?' },
@@ -573,7 +586,7 @@
         let chatScore = 0;
         let showChatCompletion = false;
 
-        // Renomeada para renderizar APENAS o conteúdo interno do simulador, não o card
+        // Function to render ONLY the inner content of the simulator, not the card itself
         function renderChatSimulatorContent() {
             const container = createElement('div');
 
@@ -606,7 +619,7 @@
                 let newFeedback = '';
                 let correct = false;
 
-                // Lógica de avaliação simplificada
+                // Simplified evaluation logic
                 if (chatCurrentIndex === 0) { // Que perfume maravilhoso esse!
                     if (moderatorResponse.toLowerCase().includes('decant') && moderatorResponse.toLowerCase().includes('link na bio')) {
                         newFeedback = 'Excelente! Você transformou um elogio em uma oportunidade de venda de decants.';
@@ -648,8 +661,8 @@
                 if (correct) {
                     chatScore++;
                 }
-                moderatorResponse = ''; // Limpa a resposta para a próxima mensagem
-                renderApp(); // Re-renderiza para mostrar o feedback
+                moderatorResponse = ''; // Clear response for the next message
+                renderApp(); // Re-render to show feedback
             };
 
             const handleNextMessage = () => {
@@ -659,7 +672,7 @@
                 } else {
                     showChatCompletion = true;
                 }
-                renderApp(); // Re-renderiza para a próxima mensagem ou conclusão
+                renderApp(); // Re-render for the next message or completion
             };
 
             buttonsDiv.appendChild(renderStyledButton('Enviar Resposta', handleSubmitResponse, 'bg-green-600 hover:bg-green-700'));
@@ -671,33 +684,33 @@
                 container.appendChild(createElement('div', `mt-6 p-4 rounded-lg ${feedbackClass} border`, `<p class="font-semibold text-lg">${chatFeedback}</p>`));
             }
 
-            return container; // Retorna o elemento DOM com o conteúdo do simulador
+            return container; // Returns the DOM element with the simulator content
         }
 
 
-        // --- Função Principal de Renderização da Aplicação ---
+        // --- Main Application Rendering Function ---
         function renderApp() {
             const appRoot = document.getElementById('app-root');
-            appRoot.innerHTML = ''; // Limpa o conteúdo atual
+            appRoot.innerHTML = ''; // Clears current content
 
             const currentStepData = steps[currentStep];
 
-            // Título principal
+            // Main title
             appRoot.appendChild(createElement('h1', 'text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-10 leading-tight', `Treinamento de Moderadores <span class="text-purple-700">Lord Aroma</span>`));
 
-            // Barra de progresso
+            // Progress bar
             appRoot.appendChild(renderProgressBar());
 
-            // Renderiza o card e obtém a referência ao elemento de conteúdo interno
+            // Renders the card and gets the reference to the inner content element
             const { cardElement, contentElement } = renderCard(currentStepData.title, currentStepData.content);
             appRoot.appendChild(cardElement);
 
-            // Conteúdo específico para o simulador de chat
+            // Specific content for the chat simulator
             if (currentStepData.id === 'simulador-chat') {
                 contentElement.appendChild(renderChatSimulatorContent());
             }
 
-            // Lógica do botão de quiz para módulos de aprendizado
+            // Logic for the quiz button for learning modules
             if (currentStepData.quiz) {
                 if (!quizCompletedStatus[currentStepData.id]) {
                     const testKnowledgeButton = renderStyledButton(
@@ -710,25 +723,25 @@
                                 // No re-render here, feedback is handled inside renderQuiz
                             });
                             const quizModal = renderModal(
-                                quizContentElement, // Passa o elemento DOM do quiz diretamente
+                                quizContentElement, // Pass the DOM element of the quiz directly
                                 () => {
-                                    appRoot.removeChild(quizModal); // Fecha o modal
-                                    currentQuizScore = null; // Reseta o score do quiz
-                                    renderApp(); // Re-renderiza para atualizar o estado do módulo
+                                    appRoot.removeChild(quizModal); // Close the modal
+                                    currentQuizScore = null; // Reset quiz score
+                                    renderApp(); // Re-render to update module state
                                 }
                             );
-                            appRoot.appendChild(quizModal); // Abre o modal
+                            appRoot.appendChild(quizModal); // Open the modal
                         },
                         'w-full mt-8'
                     );
-                    // Adiciona o botão "Testar Conhecimento" ao card
+                    // Add the "Testar Conhecimento" button to the card
                     contentElement.appendChild(testKnowledgeButton);
                 } else {
                     contentElement.appendChild(createElement('div', 'mt-8 text-center text-green-600 font-bold text-lg', 'Módulo Concluído! 🎉'));
                 }
             }
 
-            // Botões de navegação
+            // Navigation buttons
             const navigationDiv = createElement('div', 'flex justify-between items-center mt-8 pt-4 border-t border-gray-200');
 
             const prevButton = renderStyledButton(
@@ -746,6 +759,7 @@
 
             navigationDiv.appendChild(createElement('span', 'text-lg font-semibold text-gray-700', `Passo ${currentStep + 1} de ${steps.length}`));
 
+            // Determine if the "Próximo" button should be enabled
             const canProceed = (currentStepData.quiz && quizCompletedStatus[currentStepData.id]) || !currentStepData.quiz || currentStepData.id === 'simulador-chat' || currentStepData.id === 'intro' || currentStepData.id === 'estrutura-live' || currentStepData.id === 'recursos-adicionais' || currentStepData.id === 'conclusao';
 
             const nextButton = renderStyledButton(
@@ -764,7 +778,7 @@
             appRoot.appendChild(navigationDiv);
         }
 
-        // Renderiza a aplicação quando a página é carregada
+        // Render the application when the page is loaded
         document.addEventListener('DOMContentLoaded', renderApp);
 
     </script>
