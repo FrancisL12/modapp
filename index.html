@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treinamento de Moderadores Lord Aroma</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Ajustes para listas dentro de prose */
+        .prose ul li {
+            margin-bottom: 0.5rem;
+        }
+        .prose ul.list-disc li {
+            list-style-type: disc;
+            margin-left: 1.25rem; /* Ajusta o recuo para listas de disco */
+        }
+        .prose ul.list-circle li {
+            list-style-type: circle;
+            margin-left: 1.25rem; /* Ajusta o recuo para listas de círculo */
+        }
+        .prose ul.list-square li {
+            list-style-type: square;
+            margin-left: 1.25rem; /* Ajusta o recuo para listas de quadrado */
+        }
+        /* Animação para modals */
+        .animate-scale-in {
+            animation: scaleIn 0.3s ease-out forwards;
+        }
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        /* Custom scrollbar for modal */
+        .max-h-[90vh]::-webkit-scrollbar {
+            width: 8px;
+        }
+        .max-h-[90vh]::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .max-h-[90vh]::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .max-h-[90vh]::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-100 p-6 font-sans antialiased text-gray-800">
+    <div id="app-root" class="container mx-auto max-w-3xl">
+        <!-- Conteúdo será injetado aqui pelo JavaScript -->
+    </div>
+
+    <script>
+        // Variáveis de estado globais
+        let currentStep = 0;
+        let quizCompletedStatus = {}; // { 'moduleId': true/false }
+
+        // --- Dados da Aplicação (Passos, Quizzes) ---
+        const steps = [
+            {
+                id: 'intro',
+                title: 'Bem-vindo ao Treinamento de Moderadores Lord Aroma!',
+                content: `
+                    <p>Olá, futuro moderador do Lord Aroma!</p>
+                    <p>Seu papel é crucial para o sucesso das nossas lives. Você será a orquestra secundária, garantindo que a melodia do funil de vendas seja constante, enquanto o Lord Aroma é o maestro principal.</p>
+                    <p>Este treinamento interativo foi desenvolvido para que você compreenda completamente suas funções e se sinta preparado para atuar com confiança e eficiência. Vamos aprender e praticar juntos!</p>
+                    <p class="mt-4 text-center text-lg font-bold text-purple-700">Prepare-se para se tornar um mestre na moderação!</p>
+                `,
+            },
+            {
+                id: 'estrutura-live',
+                title: 'A Estrutura da Live: Micro-Blocos e Funil',
+                content: `
+                    <p>Nossas lives de 2 horas são divididas em 4 ciclos de 30 minutos, cada um com uma mini-jornada e uma Chamada para Ação (CTA) específica.</p>
+                    <h3 class="text-2xl font-semibold text-gray-900 mt-6 mb-3">Ciclo 1 e 3: Foco em Decants (Minutos 0-30 e 60-90)</h3>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>**Conteúdo (25 minutos):** Apresentação de 3-5 perfumes, storytelling sobre notas, sensações e "status". Interação sobre esses perfumes.</li>
+                        <li>**Chamada para Ação (5 minutos):** Lord Aroma incentiva a compra de decants para experimentar os perfumes.</li>
+                        <li>**Seu Papel como Moderador:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Fixar comentário: "Link dos Decants na Bio! Clique e experimente seus perfumes preferidos!"</li>
+                            <li>Responder dúvidas sobre como encontrar o link ou comprar decants.</li>
+                            <li>Reforçar a CTA: "Não perca tempo, os decants são limitados! Link na Bio!"</li>
+                        </ul>
+                        </li>
+                    </ul>
+                    <h3 class="text-2xl font-semibold text-gray-900 mt-6 mb-3">Ciclo 2 e 4: Foco no Grupo de Lacrados (Minutos 30-60 e 90-120)</h3>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>**Conteúdo (25 minutos):** Apresentação de 3-5 perfumes "oportunidades" (raros, com desconto) para compra de frascos lacrados. Foco na economia a longo prazo e experiência completa.</li>
+                        <li>**Chamada para Ação (5 minutos):** Lord Aroma convida para o Grupo VIP do WhatsApp para ofertas exclusivas de lacrados.</li>
+                        <li>**Seu Papel como Moderador:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Fixar comentário: "Quer ofertas exclusivas de Lacrados? Entre no Grupo VIP do WhatsApp! Link na Bio!"</li>
+                            <li>Responder dúvidas sobre o grupo e o que ele oferece.</li>
+                            <li>Reforçar a CTA: "Não fique de fora das promoções! Grupo VIP no WhatsApp, link na Bio!"</li>
+                        </ul>
+                        </li>
+                    </ul>
+                    <p class="mt-6">Compreender essa estrutura é o primeiro passo para uma moderação eficaz!</p>
+                `,
+            },
+            {
+                id: 'modulo-gestao-comentarios',
+                title: 'Módulo 1: Gestão de Comentários e Perguntas (Tempo Real)',
+                content: `
+                    <p>Como moderador, você é o "curador do chat", garantindo que as informações fluam e que o ambiente seja propício para a venda e o engajamento.</p>
+                    <ul class="list-disc list-inside space-y-3 ml-4">
+                        <li>**Filtro de Relevância e Priorização:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Identifique e priorize perguntas pertinentes sobre os perfumes e produtos (decants/lacrados).</li>
+                            <li>Perguntas diretas sobre o perfume sendo apresentado (ex: "Qual a projeção?", "É bom para o dia a dia?") devem ser repassadas para o Lord com destaque.</li>
+                            <li>Exemplo de ação: Copie a pergunta relevante e cole em um canal de comunicação interno (WhatsApp, Discord) para o Lord, ou marque o Lord nos comentários para chamar a atenção.</li>
+                        </ul>
+                        </li>
+                        <li>**Respostas Rápidas e Padronizadas:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Crie um "manual de respostas rápidas" (disponível no final deste treinamento).</li>
+                            <li>Exemplos: "O link para comprar/entrar está na Bio do perfil do Lord Aroma, pessoal!", "Sim, todos os perfumes do Lord Aroma são 100% originais!", "Entregamos para todo o Brasil!".</li>
+                            <li>Impacto: Reduz a barreira da dúvida para a compra, agiliza o processo e libera o Lord para focar no conteúdo.</li>
+                        </ul>
+                        </li>
+                        <li>**Limpeza e Segurança do Ambiente:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Remova comentários inadequados, spam ou ofensivos.</li>
+                            <li>Bloqueie usuários recorrentes que insistem em desviar o assunto ou criar atritos.</li>
+                            <li>Proteja o Lord, evitando que comentários negativos ou desnecessários tirem o foco ou o tempo dele.</li>
+                        </ul>
+                        </li>
+                        <li>**Engajamento Ativo e Incentivo:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Provoque a interação com perguntas abertas (ex: "Qual perfume vocês usam hoje?", "Qual a fragrância dos seus sonhos?").</li>
+                            <li>Peça likes e compartilhamentos: "Deixem o like na live pra mais dicas como essa!", "Compartilhem com um amigo que ama perfume!".</li>
+                            <li>Reconheça e mencione nomes de quem fez perguntas legais ou interagiu bastante, criando senso de comunidade.</li>
+                            <li>Impacto: Mais engajamento = mais tempo de visualização = maior probabilidade de exposição à CTA e, consequentemente, mais conversões.</li>
+                        </ul>
+                        </li>
+                    </ul>
+                `,
+                quiz: {
+                    questions: [
+                        {
+                            question: "Qual o principal objetivo do moderador ao responder a perguntas rápidas no chat?",
+                            options: [
+                                "Mostrar que o moderador sabe todas as respostas.",
+                                "Reduzir a barreira da dúvida para a compra e liberar o Lord para focar no conteúdo.",
+                                "Apenas manter o chat movimentado.",
+                                "Ignorar as perguntas para não atrapalhar o Lord."
+                            ],
+                            correctAnswer: 1,
+                        },
+                        {
+                            question: "Quando um usuário faz uma pergunta muito específica sobre um perfume que o Lord não está abordando no momento, qual a melhor ação do moderador?",
+                            options: [
+                                "Responder a pergunta diretamente, mesmo que não saiba a resposta exata.",
+                                "Ignorar a pergunta.",
+                                "Direcionar a pergunta para o Lord em um canal interno ou chamando a atenção no chat.",
+                                "Bloquear o usuário por fazer perguntas irrelevantes."
+                            ],
+                            correctAnswer: 2,
+                        },
+                    ],
+                },
+            },
+            {
+                id: 'modulo-reforco-cta',
+                title: 'Módulo 2: Reforço da Chamada para Ação (CTA)',
+                content: `
+                    <p>Você é o "garoto-propaganda do chat", garantindo que a mensagem de venda e comunidade esteja sempre visível e reforçada.</p>
+                    <ul class="list-disc list-inside space-y-3 ml-4">
+                        <li>**Fixar Comentários Dinâmicos e Persuasivos:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Altere o comentário fixado conforme o ciclo da live (decants/lacrados).</li>
+                            <li>Exemplos para Decants:
+                            <ul class="list-square list-inside ml-4">
+                                <li>"🔥 DECISÃO INTELIGENTE: EXPERIMENTE ANTES DE COMPRAR! Decants dos melhores perfumes na Bio! Clique JÁ! 🔥"</li>
+                                <li>"👃 DESCUBRA SEU CHEIRO ASSINATURA! Decants exclusivos do Lord Aroma – Link na Bio! 🚀"</li>
+                            </ul>
+                            </li>
+                            <li>Exemplos para Grupo de Lacrados:
+                            <ul class="list-square list-inside ml-4">
+                                <li>"💸 ECONOMIZE DE VERDADE COM PERFUMES LACRADOS! Entre no Grupo VIP do WhatsApp – Link na Bio! Vagas limitadas! 🚨"</li>
+                                <li>"👑 FAÇA PARTE DA ELITE DA PERFUMARIA! Acesso a ofertas exclusivas no Grupo VIP Lord Aroma – Link na Bio! ✨"</li>
+                            </ul>
+                            </li>
+                            <li>Impacto: Mantém a oferta principal daquele bloco de 30 minutos em evidência constante.</li>
+                        </ul>
+                        </li>
+                        <li>**Respostas com CTA Estratégica:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Transforme elogios e dores em oportunidades de venda.</li>
+                            <li>Comentário: "Que perfume maravilhoso esse!"</li>
+                            <li>Sua Resposta: "É incrível mesmo! Quer sentir ele na sua pele? O decant está disponível no link da Bio! Corre lá!"</li>
+                            <li>Comentário: "Quero comprar esse perfume, mas está caro!"</li>
+                            <li>Sua Resposta: "Entendo! No nosso Grupo VIP do WhatsApp, conseguimos preços exclusivos para lacrados! O link pra entrar está na Bio, não perca!"</li>
+                        </ul>
+                        </li>
+                        <li>**Criação de Senso de Urgência e Escassez (Real ou Estratégico):**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>"Pessoal, acabamos de vender mais 3 decants do [Nome do Perfume]! Corram antes que acabe!"</li>
+                            <li>"Atenção! Mais 5 vagas preenchidas no Grupo VIP! Logo não teremos mais espaço!"</li>
+                            <li>"Última chance de garantir essa oferta exclusiva de decants dessa leva!"</li>
+                            <li>Impacto: Gatilha a tomada de decisão rápida, evitando que o espectador adie a compra ou a entrada no grupo.</li>
+                        </ul>
+                        </li>
+                    </ul>
+                `,
+                quiz: {
+                    questions: [
+                        {
+                            question: "Um usuário comenta: 'Que perfume incrível!'. Como o moderador pode usar a CTA?",
+                            options: [
+                                "Apenas responder: 'Sim, é maravilhoso!'",
+                                "Direcionar para o decant do perfume: 'Quer sentir ele na sua pele? O decant está disponível no link da Bio! Corre lá!'",
+                                "Ignorar o comentário, pois não é uma pergunta.",
+                                "Pedir para o usuário chamar no direct."
+                            ],
+                            correctAnswer: 1,
+                        },
+                        {
+                            question: "Durante um ciclo focado em decants, qual comentário o moderador deve fixar?",
+                            options: [
+                                "Ofertas exclusivas de Lacrados! Entre no Grupo VIP!",
+                                "Link dos Decants na Bio! Clique e experimente seus perfumes preferidos!",
+                                "Bem-vindos à live do Lord Aroma!",
+                                "Perfume X é o melhor!"
+                            ],
+                            correctAnswer: 1,
+                        },
+                    ],
+                },
+            },
+            {
+                id: 'modulo-prova-social',
+                title: 'Módulo 3: Gatilhos de Prova Social e Autoridade',
+                content: `
+                    <p>Você ajuda a construir confiança e credibilidade para o Lord Aroma, usando o que os outros dizem de bom.</p>
+                    <ul class="list-disc list-inside space-y-3 ml-4">
+                        <li>**Destacar Depoimentos:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Se alguém no chat comentar que comprou um decant e amou, o moderador pode:
+                            <ul class="list-square list-inside ml-4">
+                                <li>Fixar esse comentário por um tempo.</li>
+                                <li>Chamar a atenção do Lord para ele (ex: "Lord, olha o comentário do João, ele amou o decant do Aventus que comprou com você!").</li>
+                            </ul>
+                            </li>
+                            <li>Impacto: Mostra que outras pessoas já compraram e estão satisfeitas, gerando confiança em novos compradores.</li>
+                        </ul>
+                        </li>
+                        <li>**Reforçar a Autoridade do Lord Aroma:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Em momentos oportunos, ou quando houver dúvidas sobre a curadoria, o moderador pode reforçar:
+                            <ul class="list-square list-inside ml-4">
+                                <li>"Lembrem-se, pessoal, a curadoria do Lord Aroma é impecável! Ele realmente entende de perfumes e só indica o melhor!"</li>
+                                <li>"Todos os produtos são 100% originais e selecionados pelo Lord Aroma, podem confiar!"</li>
+                            </ul>
+                            </li>
+                            <li>Impacto: Solidifica a imagem do Lord como especialista, aumentando a confiança nas recomendações e produtos.</li>
+                        </ul>
+                        </li>
+                        <li>**Interagir com Fãs e Clientes Fiéis:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Quando clientes conhecidos ou fãs entusiastas aparecem no chat:
+                            <ul class="list-square list-inside ml-4">
+                                <li>Mencione-os e agradeça o apoio (ex: "Que bom te ver aqui, [Nome do Fã]!").</li>
+                                <li>Isso cria um senso de comunidade e incentiva outros a se tornarem parte desse grupo.</li>
+                            </ul>
+                            </li>
+                            <li>Impacto: Fortalece a comunidade e cria um ambiente positivo, que naturalmente atrai mais pessoas.</li>
+                        </ul>
+                        </li>
+                    </ul>
+                `,
+                quiz: {
+                    questions: [
+                        {
+                            question: "Um usuário no chat escreve: 'Recebi meu decant e adorei!'. Qual a melhor ação do moderador para usar a prova social?",
+                            options: [
+                                "Agradecer e seguir em frente.",
+                                "Fixar o comentário no topo do chat e, se possível, chamar a atenção do Lord para ele.",
+                                "Responder com um emoji de coração.",
+                                "Pedir para o usuário gravar um vídeo de depoimento."
+                            ],
+                            correctAnswer: 1,
+                        },
+                        {
+                            question: "Por que é importante para o moderador reforçar a autoridade do Lord Aroma?",
+                            options: [
+                                "Para que o Lord se sinta valorizado.",
+                                "Para aumentar a confiança dos espectadores nas recomendações e produtos, e impulsionar vendas.",
+                                "Para preencher o chat com informações.",
+                                "Não é uma função importante do moderador."
+                            ],
+                            correctAnswer: 1,
+                        },
+                    ],
+                },
+            },
+            {
+                id: 'modulo-suporte-basico',
+                title: 'Módulo 4: Suporte ao Cliente Básico (Durante a Live)',
+                content: `
+                    <p>Você atua como a primeira linha de suporte, resolvendo dúvidas simples e direcionando as mais complexas.</p>
+                    <ul class="list-disc list-inside space-y-3 ml-4">
+                        <li>**Orientações Gerais:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Se alguém perguntar "Como compro?", "Como faço para entrar no grupo?", etc., o moderador deve dar um mini passo a passo claro:
+                            <ul class="list-square list-inside ml-4">
+                                <li>"Vá no meu perfil, clique no link da Bio e lá você verá as opções de decants e o link para o grupo."</li>
+                                <li>"Aceitamos cartão, pix, boleto! Todas as opções no link da Bio."</li>
+                                <li>"Entregamos para todo o Brasil! Verifique o frete no site/link da Bio."</li>
+                            </ul>
+                            </li>
+                            <li>Impacto: Remove barreiras de compra e melhora a experiência do usuário.</li>
+                        </ul>
+                        </li>
+                        <li>**Direcionamento para Direct (DM) ou Contato Pós-Live:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Se a dúvida for muito específica, exigir dados pessoais, ou for complexa demais para ser resolvida no chat da live, o moderador deve pedir para a pessoa chamar no direct pós-live ou em outro canal de suporte:
+                            <ul class="list-square list-inside ml-4">
+                                <li>"Para essa dúvida específica sobre seu pedido, por favor, nos chame no direct que vamos te ajudar com mais privacidade!"</li>
+                                <li>"Questões sobre trocas ou devoluções podem ser resolvidas com nossa equipe de suporte após a live. O link para contato está na Bio!"</li>
+                            </ul>
+                            </li>
+                            <li>**Nunca peça ou incentive a partilha de dados pessoais no chat público.**</li>
+                            <li>Impacto: Garante que o cliente seja bem atendido, mesmo para questões complexas, e protege a privacidade dos usuários.</li>
+                        </ul>
+                        </li>
+                        <li>**Manter o Foco da Live:**
+                        <ul class="list-circle list-inside ml-4 mt-2">
+                            <li>Ao direcionar dúvidas complexas para fora do chat, o moderador ajuda a manter o fluxo da live focado no conteúdo e nas CTAs principais.</li>
+                            <li>Isso evita que o chat se torne um canal de suporte individual, o que poderia distrair o Lord e o restante da audiência.</li>
+                        </ul>
+                        </li>
+                    </ul>
+                `,
+                quiz: {
+                    questions: [
+                        {
+                            question: "Um usuário pergunta no chat: 'Qual o status do meu pedido XXXXX?'. Qual a melhor abordagem do moderador?",
+                            options: [
+                                "Pedir o CPF e o endereço do usuário no chat para verificar.",
+                                "Informar que não é possível verificar status de pedidos durante a live e pedir para chamar no direct após a live.",
+                                "Ignorar a pergunta.",
+                                "Tentar adivinhar o status do pedido."
+                            ],
+                            correctAnswer: 1,
+                        },
+                        {
+                            question: "Por que é importante dar orientações claras e passo a passo sobre como comprar ou entrar no grupo do WhatsApp?",
+                            options: [
+                                "Para preencher o chat com informações.",
+                                "Para demonstrar que o moderador está ativo.",
+                                "Para remover barreiras de compra e melhorar a experiência do usuário.",
+                                "Não há necessidade, o usuário deve descobrir sozinho."
+                            ],
+                            correctAnswer: 2,
+                        },
+                    ],
+                },
+            },
+            {
+                id: 'simulador-chat',
+                title: 'Simulador de Chat: Hora de Praticar!',
+                content: `
+                    <p>Agora que você aprendeu as funções essenciais, é hora de colocar em prática! Abaixo, você verá comentários de usuários e deverá digitar sua resposta como moderador. Tente aplicar tudo o que aprendeu!</p>
+                    <p class="font-semibold mt-4">Sua meta é responder da forma mais eficaz possível, seguindo as diretrizes aprendidas.</p>
+                `, // Removido o div 'chat-simulator-container' daqui
+            },
+            {
+                id: 'recursos-adicionais',
+                title: 'Recursos Adicionais: Manual do Moderador',
+                content: `
+                    <p>Para te ajudar ainda mais, aqui está um mini-manual de respostas rápidas e dicas extras:</p>
+                    <h3 class="text-2xl font-semibold text-gray-900 mt-6 mb-3">Manual de Respostas Rápidas</h3>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>**Link da Bio:** "O link para comprar/entrar (decants/grupo VIP) está no perfil do Lord Aroma, pessoal! Clica lá!"</li>
+                        <li>**Originalidade:** "Sim, todos os perfumes do Lord Aroma são 100% originais e com curadoria de especialista!"</li>
+                        <li>**Entrega/Frete:** "Entregamos para todo o Brasil! Verifique o frete no site/link da Bio."</li>
+                        <li>**Formas de Pagamento:** "Aceitamos cartão, pix, boleto! Todas as opções no link da Bio."</li>
+                        <li>**Dúvidas específicas (pós-live):** "Para essa dúvida específica, por favor, nos chame no direct que vamos te ajudar!"</li>
+                        <li>**Preço (para lacrados):** "Entendo! No nosso Grupo VIP do WhatsApp, conseguimos preços exclusivos para lacrados! O link pra entrar está na Bio, não perca!"</li>
+                    </ul>
+                    <h3 class="text-2xl font-semibold text-gray-900 mt-6 mb-3">Dicas Essenciais:</h3>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>**Seja Rápido:** O chat da live é dinâmico. Responda e interaja o mais rápido possível.</li>
+                        <li>**Mantenha a Calma:** Em caso de comentários negativos, responda profissionalmente ou remova/bloqueie.</li>
+                        <li>**Esteja Atento:** Observe o que o Lord está falando para alinhar suas CTAs e respostas.</li>
+                        <li>**Seja Positivo e Engajador:** Seu tom influencia a energia do chat!</li>
+                        <li>**Use Emojis:** Eles ajudam a transmitir emoção e captar atenção.</li>
+                    </ul>
+                    <p class="mt-6 font-semibold">Este manual é seu melhor amigo durante as lives. Consulte-o sempre que precisar!</p>
+                `,
+            },
+            {
+                id: 'conclusao',
+                title: 'Parabéns, Futuro Moderador!',
+                content: `
+                    <p class="text-xl mb-4">Você concluiu o treinamento interativo para moderadores do Lord Aroma!</p>
+                    <p class="text-lg mb-4">Agora você tem o conhecimento e as ferramentas necessárias para:</p>
+                    <ul class="list-disc list-inside mx-auto max-w-md space-y-2 text-left">
+                        <li>Compreender a estrutura das lives e o funil de vendas.</li>
+                        <li>Gerenciar comentários e perguntas de forma eficaz.</li>
+                        <li>Reforçar as Chamadas para Ação (CTAs) de maneira persuasiva.</li>
+                        <li>Utilizar gatilhos de prova social e autoridade.</li>
+                        <li>Oferecer suporte ao cliente básico durante a live.</li>
+                    </ul>
+                    <p class="text-xl font-bold mt-6 text-purple-700">Sua dedicação é fundamental para o crescimento da comunidade Lord Aroma!</p>
+                    <p class="text-lg mt-4">Continue praticando e revisando os módulos. Estamos ansiosos para vê-lo em ação!</p>
+                `,
+            },
+        ];
+
+        // --- Funções de Componentes (Replicando React com DOM) ---
+
+        function createElement(tag, classes, content = '') {
+            const el = document.createElement(tag);
+            if (classes) {
+                el.className = classes;
+            }
+            if (content) {
+                el.innerHTML = content;
+            }
+            return el;
+        }
+
+        function renderStyledButton(text, onClick, className = '', disabled = false) {
+            const button = createElement('button', `bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-300 active:scale-95 ${className}`, text);
+            button.onclick = onClick;
+            button.disabled = disabled;
+            return button;
+        }
+
+        // Modificado para retornar o elemento do card e o elemento de conteúdo interno
+        function renderCard(title, contentHtml) {
+            const card = createElement('div', 'bg-white p-6 rounded-xl shadow-lg mb-8 border border-gray-200');
+            if (title) {
+                card.appendChild(createElement('h2', 'text-3xl font-extrabold text-gray-900 mb-6 text-center', title));
+            }
+            const contentDiv = createElement('div', 'prose max-w-none text-gray-700');
+            contentDiv.innerHTML = contentHtml; // Define o conteúdo inicial do módulo
+            card.appendChild(contentDiv);
+            return { cardElement: card, contentElement: contentDiv }; // Retorna um objeto com ambos os elementos
+        }
+
+        function renderModal(childrenHtml, onClose) {
+            const modalOverlay = createElement('div', 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50');
+            const modalContentWrapper = createElement('div', 'bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto transform scale-95 animate-scale-in');
+
+            const closeButtonWrapper = createElement('div', 'flex justify-end');
+            const closeButton = createElement('button', 'text-gray-500 hover:text-gray-800 text-2xl font-bold', '&times;');
+            closeButton.onclick = onClose;
+            closeButtonWrapper.appendChild(closeButton);
+            modalContentWrapper.appendChild(closeButtonWrapper);
+
+            // Adiciona o conteúdo do modal (geralmente o quiz)
+            modalContentWrapper.appendChild(childrenHtml); // childrenHtml já é um elemento DOM
+            modalOverlay.appendChild(modalContentWrapper);
+
+            return modalOverlay;
+        }
+
+        function renderProgressBar() {
+            const progress = ((currentStep + 1) / steps.length) * 100;
+            const progressBarContainer = createElement('div', 'w-full bg-gray-200 rounded-full h-4 mb-6 relative overflow-hidden');
+            const progressBarFill = createElement('div', 'bg-purple-500 h-full rounded-full transition-all duration-500 ease-out');
+            progressBarFill.style.width = `${progress}%`;
+            const progressText = createElement('div', 'absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800', `${Math.round(progress)}% Concluído`);
+
+            progressBarContainer.appendChild(progressBarFill);
+            progressBarContainer.appendChild(progressText);
+            return progressBarContainer;
+        }
+
+        let currentQuizScore = null; // Para manter o score do quiz no modal
+
+        function renderQuiz(questions, onSubmit) {
+            const quizContainer = createElement('div', 'p-4');
+            quizContainer.appendChild(createElement('h3', 'text-2xl font-bold text-gray-800 mb-6 text-center', 'Quiz de Conhecimento'));
+
+            let selectedAnswers = {};
+            let submitted = false;
+
+            questions.forEach((q, qIndex) => {
+                const questionDiv = createElement('div', 'mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50');
+                questionDiv.appendChild(createElement('p', 'font-semibold text-lg mb-3 text-gray-800', `${qIndex + 1}. ${q.question}`));
+
+                q.options.forEach((option, oIndex) => {
+                    const label = createElement('label', 'block mb-2 text-gray-700');
+                    const input = createElement('input', 'mr-2 accent-purple-600');
+                    input.type = 'radio';
+                    input.name = `question-${qIndex}`;
+                    input.value = oIndex;
+                    input.onchange = () => {
+                        selectedAnswers[qIndex] = oIndex;
+                    };
+                    input.disabled = submitted;
+
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option));
+
+                    questionDiv.appendChild(label);
+                });
+                quizContainer.appendChild(questionDiv);
+            });
+
+            const submitButton = renderStyledButton(
+                submitted ? 'Quiz Enviado' : 'Enviar Respostas',
+                () => {
+                    let score = 0;
+                    questions.forEach((q, index) => {
+                        if (selectedAnswers[index] === q.correctAnswer) {
+                            score++;
+                        }
+                    });
+                    currentQuizScore = score; // Atualiza o score globalmente
+                    submitted = true;
+                    onSubmit(score); // Chama o callback para o módulo pai
+
+                    // Remove qualquer feedback anterior antes de adicionar o novo
+                    const existingFeedback = quizContainer.querySelector('.feedback-message');
+                    if (existingFeedback) {
+                        quizContainer.removeChild(existingFeedback);
+                    }
+
+                    const feedbackHtml = `
+                        <p class="text-center mt-4 text-xl feedback-message">
+                            Você acertou ${currentQuizScore} de ${questions.length} perguntas.
+                            ${currentQuizScore === questions.length ?
+                                '<span class="text-green-600 font-bold block mt-2"> Parabéns, você domina este módulo!</span>' :
+                                '<span class="text-red-600 font-bold block mt-2"> Revise o conteúdo e tente novamente.</span>'
+                            }
+                        </p>
+                    `;
+                    quizContainer.appendChild(createElement('div', '', feedbackHtml)); // Adiciona o feedback
+
+                    // Desabilita as opções e o botão de envio após a submissão
+                    quizContainer.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
+                    submitButton.disabled = true;
+
+                },
+                'w-full mt-4',
+                submitted || Object.keys(selectedAnswers).length < questions.length
+            );
+            quizContainer.appendChild(submitButton);
+
+            return quizContainer;
+        }
+
+        // Variáveis de estado para o Simulador de Chat
+        let chatMessages = [
+            { sender: 'Usuário', text: 'Que perfume maravilhoso esse!' },
+            { sender: 'Usuário', text: 'Onde consigo o link para comprar os decants?' },
+            { sender: 'Usuário', text: 'Quero comprar esse perfume, mas está caro!' },
+            { sender: 'Usuário', text: 'O Lord Aroma é confiável? Os perfumes são originais?' },
+            { sender: 'Usuário', text: 'Qual o melhor perfume para usar no trabalho?' },
+        ];
+        let chatCurrentIndex = 0;
+        let moderatorResponse = '';
+        let chatFeedback = '';
+        let chatScore = 0;
+        let showChatCompletion = false;
+
+        // Renomeada para renderizar APENAS o conteúdo interno do simulador, não o card
+        function renderChatSimulatorContent() {
+            const container = createElement('div');
+
+            if (showChatCompletion) {
+                container.appendChild(createElement('div', 'text-center', `
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4">Simulação Concluída!</h3>
+                    <p class="text-xl text-gray-700">Você acertou ${chatScore} de ${chatMessages.length} cenários.</p>
+                    <p class="mt-4 text-lg text-gray-600">Continue praticando para aprimorar suas habilidades!</p>
+                `));
+                return container;
+            }
+
+            const currentMessage = chatMessages[chatCurrentIndex];
+
+            container.appendChild(createElement('p', 'text-lg font-semibold text-gray-800 mb-4', 'Comentário do Usuário:'));
+            container.appendChild(createElement('div', 'bg-gray-100 p-4 rounded-lg border border-gray-200 mb-6', `<p class="text-gray-700 italic">"${currentMessage.text}"</p>`));
+
+            container.appendChild(createElement('p', 'text-lg font-semibold text-gray-800 mb-3', 'Sua Resposta como Moderador:'));
+            const textarea = createElement('textarea', 'w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-purple-500 resize-y min-h-[80px]');
+            textarea.value = moderatorResponse;
+            textarea.placeholder = 'Digite sua resposta aqui...';
+            textarea.oninput = (e) => {
+                moderatorResponse = e.target.value;
+            };
+            container.appendChild(textarea);
+
+            const buttonsDiv = createElement('div', 'flex justify-between items-center mt-4');
+
+            const handleSubmitResponse = () => {
+                let newFeedback = '';
+                let correct = false;
+
+                // Lógica de avaliação simplificada
+                if (chatCurrentIndex === 0) { // Que perfume maravilhoso esse!
+                    if (moderatorResponse.toLowerCase().includes('decant') && moderatorResponse.toLowerCase().includes('link na bio')) {
+                        newFeedback = 'Excelente! Você transformou um elogio em uma oportunidade de venda de decants.';
+                        correct = true;
+                    } else {
+                        newFeedback = 'Boa tentativa, mas você poderia ter aproveitado para direcionar para o link dos decants na Bio.';
+                    }
+                } else if (chatCurrentIndex === 1) { // Onde consigo o link para comprar os decants?
+                    if (moderatorResponse.toLowerCase().includes('link na bio') && moderatorResponse.toLowerCase().includes('perfil')) {
+                        newFeedback = 'Perfeito! Resposta direta e clara, ajudando o usuário a encontrar o link rapidamente.';
+                        correct = true;
+                    } else {
+                        newFeedback = 'Você poderia ter sido mais específico sobre onde encontrar o link na Bio.';
+                    }
+                } else if (chatCurrentIndex === 2) { // Quero comprar esse perfume, mas está caro!
+                    if (moderatorResponse.toLowerCase().includes('grupo vip') && moderatorResponse.toLowerCase().includes('lacrados') && moderatorResponse.toLowerCase().includes('link na bio')) {
+                        newFeedback = 'Ótimo! Você abordou a objeção de preço e direcionou para a solução do Grupo VIP para lacrados.';
+                        correct = true;
+                    } else {
+                        newFeedback = 'Pense em como direcionar para as ofertas do Grupo VIP para lacrados quando o preço é uma objeção.';
+                    }
+                } else if (chatCurrentIndex === 3) { // O Lord Aroma é confiável? Os perfumes são originais?
+                    if (moderatorResponse.toLowerCase().includes('100% originais') && moderatorResponse.toLowerCase().includes('curadoria') && moderatorResponse.toLowerCase().includes('especialista')) {
+                        newFeedback = 'Muito bom! Você reforçou a autoridade e a confiabilidade do Lord Aroma.';
+                        correct = true;
+                    } else {
+                        newFeedback = 'Lembre-se de reforçar a originalidade e a curadoria do Lord Aroma para construir confiança.';
+                    }
+                } else if (chatCurrentIndex === 4) { // Qual o melhor perfume para usar no trabalho?
+                    if (moderatorResponse.toLowerCase().includes('lord') && moderatorResponse.toLowerCase().includes('perguntar') && moderatorResponse.toLowerCase().includes('diretamente')) {
+                        newFeedback = 'Certo! Você direcionou a pergunta para o Lord, que é o especialista em conteúdo, mantendo o fluxo da live.';
+                        correct = true;
+                    } else {
+                        newFeedback = 'Essa é uma pergunta para o Lord. O moderador deve filtrar e repassar as perguntas de conteúdo para ele.';
+                    }
+                }
+
+                chatFeedback = newFeedback;
+                if (correct) {
+                    chatScore++;
+                }
+                moderatorResponse = ''; // Limpa a resposta para a próxima mensagem
+                renderApp(); // Re-renderiza para mostrar o feedback
+            };
+
+            const handleNextMessage = () => {
+                chatFeedback = '';
+                if (chatCurrentIndex < chatMessages.length - 1) {
+                    chatCurrentIndex++;
+                } else {
+                    showChatCompletion = true;
+                }
+                renderApp(); // Re-renderiza para a próxima mensagem ou conclusão
+            };
+
+            buttonsDiv.appendChild(renderStyledButton('Enviar Resposta', handleSubmitResponse, 'bg-green-600 hover:bg-green-700'));
+            buttonsDiv.appendChild(renderStyledButton(`Próximo Comentário (${chatCurrentIndex + 1}/${chatMessages.length})`, handleNextMessage, 'bg-blue-600 hover:bg-blue-700'));
+            container.appendChild(buttonsDiv);
+
+            if (chatFeedback) {
+                const feedbackClass = chatFeedback.includes('Excelente') || chatFeedback.includes('Perfeito') || chatFeedback.includes('Muito bom') || chatFeedback.includes('Ótimo') || chatFeedback.includes('Certo') ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300';
+                container.appendChild(createElement('div', `mt-6 p-4 rounded-lg ${feedbackClass} border`, `<p class="font-semibold text-lg">${chatFeedback}</p>`));
+            }
+
+            return container; // Retorna o elemento DOM com o conteúdo do simulador
+        }
+
+
+        // --- Função Principal de Renderização da Aplicação ---
+        function renderApp() {
+            const appRoot = document.getElementById('app-root');
+            appRoot.innerHTML = ''; // Limpa o conteúdo atual
+
+            const currentStepData = steps[currentStep];
+
+            // Título principal
+            appRoot.appendChild(createElement('h1', 'text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-10 leading-tight', `Treinamento de Moderadores <span class="text-purple-700">Lord Aroma</span>`));
+
+            // Barra de progresso
+            appRoot.appendChild(renderProgressBar());
+
+            // Renderiza o card e obtém a referência ao elemento de conteúdo interno
+            const { cardElement, contentElement } = renderCard(currentStepData.title, currentStepData.content);
+            appRoot.appendChild(cardElement);
+
+            // Conteúdo específico para o simulador de chat
+            if (currentStepData.id === 'simulador-chat') {
+                contentElement.appendChild(renderChatSimulatorContent());
+            }
+
+            // Lógica do botão de quiz para módulos de aprendizado
+            if (currentStepData.quiz) {
+                if (!quizCompletedStatus[currentStepData.id]) {
+                    const testKnowledgeButton = renderStyledButton(
+                        'Testar Conhecimento',
+                        () => {
+                            const quizContentElement = renderQuiz(currentStepData.quiz.questions, (score) => {
+                                if (score === currentStepData.quiz.questions.length) {
+                                    quizCompletedStatus[currentStepData.id] = true;
+                                }
+                                // No re-render here, feedback is handled inside renderQuiz
+                            });
+                            const quizModal = renderModal(
+                                quizContentElement, // Passa o elemento DOM do quiz diretamente
+                                () => {
+                                    appRoot.removeChild(quizModal); // Fecha o modal
+                                    currentQuizScore = null; // Reseta o score do quiz
+                                    renderApp(); // Re-renderiza para atualizar o estado do módulo
+                                }
+                            );
+                            appRoot.appendChild(quizModal); // Abre o modal
+                        },
+                        'w-full mt-8'
+                    );
+                    // Adiciona o botão "Testar Conhecimento" ao card
+                    contentElement.appendChild(testKnowledgeButton);
+                } else {
+                    contentElement.appendChild(createElement('div', 'mt-8 text-center text-green-600 font-bold text-lg', 'Módulo Concluído! 🎉'));
+                }
+            }
+
+            // Botões de navegação
+            const navigationDiv = createElement('div', 'flex justify-between items-center mt-8 pt-4 border-t border-gray-200');
+
+            const prevButton = renderStyledButton(
+                'Anterior',
+                () => {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        renderApp();
+                    }
+                },
+                'bg-gray-500 hover:bg-gray-600 px-4 py-2',
+                currentStep === 0
+            );
+            navigationDiv.appendChild(prevButton);
+
+            navigationDiv.appendChild(createElement('span', 'text-lg font-semibold text-gray-700', `Passo ${currentStep + 1} de ${steps.length}`));
+
+            const canProceed = (currentStepData.quiz && quizCompletedStatus[currentStepData.id]) || !currentStepData.quiz || currentStepData.id === 'simulador-chat' || currentStepData.id === 'intro' || currentStepData.id === 'estrutura-live' || currentStepData.id === 'recursos-adicionais' || currentStepData.id === 'conclusao';
+
+            const nextButton = renderStyledButton(
+                currentStep === steps.length - 1 ? 'Concluir' : 'Próximo',
+                () => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        renderApp();
+                    }
+                },
+                'px-4 py-2',
+                currentStep === steps.length - 1 || !canProceed
+            );
+            navigationDiv.appendChild(nextButton);
+
+            appRoot.appendChild(navigationDiv);
+        }
+
+        // Renderiza a aplicação quando a página é carregada
+        document.addEventListener('DOMContentLoaded', renderApp);
+
+    </script>
+</body>
+</html>
