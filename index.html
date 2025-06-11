@@ -557,8 +557,8 @@
                         <p class="text-center mt-4 text-xl feedback-message">
                             Você acertou ${currentQuizScore} de ${questions.length} perguntas.
                             ${currentQuizScore === questions.length ?
-                                '<span class="text-green-600 font-bold block mt-2"> Parabéns, você domina este módulo!</span>' :
-                                '<span class="text-red-600 font-bold block mt-2"> Revise o conteúdo e tente novamente.</span>'
+                                '<span class="text-green-600 font-bold block mt-2"> Parabéns, você domina este módulo!</span><span class="text-gray-600 block mt-2">Clique no "X" para fechar e prosseguir.</span>' :
+                                '<span class="text-red-600 font-bold block mt-2"> Revise o conteúdo e tente novamente. Você precisa acertar todas as perguntas para avançar!</span>'
                             }
                         </p>
                     `;
